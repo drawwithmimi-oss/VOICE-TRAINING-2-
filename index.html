@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#8b5cf6" />
+  <meta name="theme-color" content="#fff4f2" />
   <meta name="description" content="Voice Training Companion - Practice pitch control while reading texts" />
   <meta name="author" content="Voice Training App" />
 
@@ -23,46 +23,79 @@
   <!-- PWA Manifest -->
   <link
     rel="manifest"
-    href="data:application/json;base64,eyJuYW1lIjoiVm9pY2UgVHJhaW5pbmcgQ29tcGFuaW9uIiwic2hvcnRfbmFtZSI6IlZvaWNlVHJhaW5lciIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjOGI1Y2Y2IiwidGhlbWVfY29sb3IiOiIjOGI1Y2Y2Iiwib3JpZW50YXRpb24iOiJhbnkiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFJQUFBQUNBQ0FZQUFBRERQbUhMQUFBQUFYTlNSMElBcnM0YzZRQUFBQVJuUVUxQkFBQ3hqd3Y4WVFVQUFBQUpjRWhaY3dBQURzTUFBQTdEQWNkdnFHUUFBQUFHWFJGV0hSVGIyWjBkMkZ5WlFCQlpHOWlaU0JKYldGblpWSmxZV1I1Y2NsbFBBQUFBQmgwUlZoMFEzSmxZWFJwYjI0Z1ZHbHRaUUF3TVM4d05pOHhORUFBQUFCUVNVUkJWSGphN2QwQkNzSXdFQVRGbjhaUXpQOEFBQUFBRUxFVVFRQUFBQUFTVVZPUks1Q1lJST0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=="
+    href="data:application/json;base64,eyJuYW1lIjoiVm9pY2UgVHJhaW5pbmcgQ29tcGFuaW9uIiwic2hvcnRfbmFtZSI6IlZvaWNlVHJhaW5lciIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmNGYyIiwidGhlbWVfY29sb3IiOiIjZmZmNGYyIiwib3JpZW50YXRpb24iOiJhbnkiLCJpY29ucyI6W119"
   />
 
-  <!-- Favicon -->
-  <link
-    rel="icon"
-    type="image/png"
-    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-  />
+  <!-- SVL favicon (optional) -->
+  <link rel="icon" href="https://www.seattlevoicelab.com/wp-content/uploads/2023/05/favic-150x150.png" sizes="32x32" />
 
-  <!-- Libraries -->
+  <!-- OPTIONAL: Headline font (uncomment to use Averia Serif Libre like parts of the site) -->
+  <!--
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&display=swap" rel="stylesheet">
+  -->
+
+  <!-- Tailwind config BEFORE the CDN script -->
+  <script>
+    tailwind = {
+      theme: {
+        extend: {
+          colors: {
+            svl: {
+              beige:  '#fff4f2',
+              purple: '#904dff',
+              pink:   '#ffa2fe',
+              orange: '#ff722f',
+              yellow: '#fdd55a',
+              grey:   '#3b1e36',
+              blue:   '#6f81ff'
+            }
+          },
+          fontFamily: {
+            // Body/UI font: fast, looks close to SVL site
+            brand: [
+              'var(--svl-font, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Apple Color Emoji, Segoe UI Emoji)'
+            ],
+            // Headings accent (use Averia if enabled above)
+            display: [
+              'var(--svl-display, var(--svl-font, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto))'
+            ]
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React / Babel -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    :root{
+      /* Default fonts; set these to switch site-wide typography */
+      --svl-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, 'Helvetica Neue', Helvetica, 'Apple Color Emoji','Segoe UI Emoji';
+      /* If you uncomment the Google Font above, set this to: 'Averia Serif Libre', Georgia, serif */
+      --svl-display: var(--svl-font);
+    }
+
     /* ---------- Fit-to-screen app shell ---------- */
     html, body { height: 100%; margin: 0; overflow: hidden; }
     #root { height: 100%; }
     .app-shell {
-      height: 100dvh;           /* dynamic viewport height (mobile toolbars) */
-      min-height: 100dvh;
-      display: grid;
-      grid-template-rows: auto 1fr; /* header + main area */
+      height: 100dvh; min-height: 100dvh;
+      display: grid; grid-template-rows: auto 1fr;
     }
-    .main-area {
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .panel { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
-    .reader-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+    .main-area { overflow: auto; -webkit-overflow-scrolling: touch; }
+    .panel, .reader-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: auto; }
     .reader-content { flex: 1 1 auto; min-height: 0; overflow: auto; }
 
     /* Reading typography */
     .reading-text {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', 'Roboto', 'Helvetica', sans-serif;
-      line-height: 2;
-      letter-spacing: 0.05em;
-      word-spacing: 0.2em;
+      font-family: var(--svl-font);
+      line-height: 2; letter-spacing: 0.05em; word-spacing: 0.2em;
     }
 
     /* Smooth scrolling */
@@ -102,9 +135,14 @@
       .floating-bubble, button, select { display: none !important; }
       .reading-text { color: black !important; background: white !important; }
     }
+
+    /* Slider track/thumb (brand hint) */
+    input[type="range"]{
+      accent-color: #904dff; /* purple */
+    }
   </style>
 </head>
-<body>
+<body class="font-brand bg-svl-beige text-svl-grey">
   <div id="root"></div>
 
   <script type="text/babel">
@@ -144,7 +182,7 @@
         'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00
       };
 
-      // 📚 Readings (Rainbow Passage completed)
+      // 📚 Readings (includes full Rainbow + fem monologues)
       const readings = [
         {
           id: 'rainbow',
@@ -176,8 +214,6 @@ The melody of speech comes from within.
 
 I embrace my unique vocal qualities.`
         },
-
-        /* ---- Fem Monologues (grouped with emojis to guide focus) ---- */
 
         // 🎈 Bouncy Voice
         {
@@ -372,7 +408,6 @@ that he knew the good of it.`
           if (!audioContextRef.current) {
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
           }
-          // iOS/Safari: make sure context is running on user gesture
           await audioContextRef.current.resume();
 
           const stream = await navigator.mediaDevices.getUserMedia({
@@ -421,7 +456,7 @@ that he knew the good of it.`
         detect();
       }, []);
 
-      // -------- Drone controls (no phone-boost; smoother fades) --------
+      // -------- Drone controls (smoother, volume 0–200%) --------
       const startDrone = useCallback(async () => {
         if (!audioContextRef.current) {
           audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -445,12 +480,10 @@ that he knew the good of it.`
           const master = ctx.createGain();
           master.gain.value = 0; // fade-in from zero
 
-          // chain: osc -> compressor -> master -> destination
           osc.connect(comp);
           comp.connect(master);
           master.connect(ctx.destination);
 
-          // start + fade in
           const now = ctx.currentTime;
           master.gain.setValueAtTime(0, now);
           master.gain.linearRampToValueAtTime(volume, now + 0.2);
@@ -497,9 +530,7 @@ that he knew the good of it.`
         }
       }, [volume]);
 
-      // init on mount (will show a button if denied)
       useEffect(() => {
-        // Try to init; if browser blocks, UI shows "Enable Audio" to try again by gesture
         initAudio();
         return () => {
           if (pitchDetectionRef.current) cancelAnimationFrame(pitchDetectionRef.current);
@@ -510,12 +541,12 @@ that he knew the good of it.`
       }, [initAudio]);
 
       const getPitchColor = () => {
-        if (currentPitch === 0) return 'bg-gray-400';
+        if (currentPitch === 0) return 'bg-gray-300';
         const target = notes[selectedNote];
         const diff = Math.abs(currentPitch - target);
-        if (diff < 5) return 'bg-green-500';
-        if (diff < 15) return 'bg-yellow-500';
-        return 'bg-red-500';
+        if (diff < 5)  return 'bg-svl-blue';
+        if (diff < 15) return 'bg-svl-yellow';
+        return 'bg-svl-orange';
       };
 
       const getPitchStatus = () => {
@@ -537,19 +568,26 @@ that he knew the good of it.`
       };
 
       return (
-        <div className="app-shell bg-gradient-to-br from-purple-50 to-pink-50 safe-top safe-bottom">
-          {/* Header */}
-          <header className="bg-white shadow-sm sticky top-0 z-50 safe-top">
+        <div className="app-shell safe-top safe-bottom">
+          {/* Header with SVL branding */}
+          <header className="bg-svl-beige shadow-sm sticky top-0 z-50 safe-top border-b border-svl-purple/20">
             <div className="desktop-container px-4 py-3">
               <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">Voice Training Reader</h1>
-                  <p className="text-xs md:text-sm text-gray-600">Practice pitch while reading</p>
+                <div className="flex items-center gap-3">
+                  <img
+                    src="https://www.seattlevoicelab.com/wp-content/uploads/2023/05/SVL_LogoSignature.png"
+                    alt="Seattle Voice Lab"
+                    className="h-8 md:h-10"
+                  />
+                  <div>
+                    <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-svl-grey">Voice Training Reader</h1>
+                    <p className="text-xs md:text-sm text-svl-grey/70">Practice pitch while reading</p>
+                  </div>
                 </div>
                 {!audioInitialized && (
                   <button
                     onClick={initAudio}
-                    className="px-3 py-2 rounded-lg bg-purple-600 text-white text-sm hover:bg-purple-700"
+                    className="px-3 py-2 rounded-lg bg-svl-purple text-white text-sm hover:opacity-90"
                   >Enable Audio</button>
                 )}
               </div>
@@ -557,21 +595,21 @@ that he knew the good of it.`
           </header>
 
           {/* Main (fit-to-screen; internal scroll only) */}
-          <div className="main-area">
+          <div className="main-area bg-gradient-to-b from-svl-beige to-svl-beige">
             <div className="desktop-container p-4 h-full min-h-0">
               {!selectedReading ? (
                 <div className="grid lg:grid-cols-2 gap-6 h-full min-h-0">
                   {/* Pitch Control */}
-                  <div className="panel bg-white rounded-xl shadow-lg p-4 md:p-6">
-                    <h2 className="text-lg md:text-xl font-semibold mb-4">🎯 Pitch Control</h2>
+                  <div className="panel bg-white rounded-xl shadow-lg p-4 md:p-6 border border-svl-purple/10">
+                    <h2 className="font-display text-lg md:text-xl font-semibold mb-4 text-svl-grey">🎯 Pitch Control</h2>
 
                     {/* Target Note */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">🎵 Target Note</label>
+                      <label className="block text-sm font-medium text-svl-grey mb-2">🎵 Target Note</label>
                       <select
                         value={selectedNote}
                         onChange={(e) => setSelectedNote(e.target.value)}
-                        className="w-full p-3 text-base md:text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full p-3 text-base md:text-lg border border-svl-purple/30 rounded-lg focus:ring-2 focus:ring-svl-purple focus:border-svl-purple"
                       >
                         {Object.entries(notes).map(([note, freq]) => (
                           <option key={note} value={note}>
@@ -583,8 +621,8 @@ that he knew the good of it.`
 
                     {/* Volume */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        🔊 Drone Volume <span className="text-gray-500">({Math.round(volume * 100)}%)</span>
+                      <label className="block text-sm font-medium text-svl-grey mb-2">
+                        🔊 Drone Volume <span className="text-svl-grey/60">({Math.round(volume * 100)}%)</span>
                       </label>
                       <input
                         aria-label="Drone volume"
@@ -596,7 +634,7 @@ that he knew the good of it.`
                         onChange={(e) => setVolume(parseInt(e.target.value, 10) / 100)}
                         className="w-full"
                       />
-                      <div className="flex justify-between text-xs text-gray-500 mt-1"><span>0%</span><span>200%</span></div>
+                      <div className="flex justify-between text-xs text-svl-grey/60 mt-1"><span>0%</span><span>200%</span></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4">
@@ -607,8 +645,8 @@ that he knew the good of it.`
                           !audioInitialized
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : isDronePlaying
-                              ? 'bg-red-500 text-white hover:bg-red-600'
-                              : 'bg-purple-500 text-white hover:bg-purple-600'
+                              ? 'bg-svl-orange text-white hover:opacity-90'
+                              : 'bg-svl-purple text-white hover:opacity-90'
                         }`}
                       >
                         {isDronePlaying ? '⏹ Stop Drone' : '▶ Start Drone'}
@@ -621,8 +659,8 @@ that he knew the good of it.`
                           !audioInitialized
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : showBubble
-                              ? 'bg-green-500 text-white hover:bg-green-600'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
+                              ? 'bg-svl-blue text-white hover:opacity-90'
+                              : 'bg-svl-pink text-svl-grey hover:opacity-95'
                         }`}
                       >
                         {showBubble ? '✓ Monitor On' : '👁 Show Monitor'}
@@ -632,15 +670,15 @@ that he knew the good of it.`
                     {audioInitialized && (
                       <div className="mt-auto">
                         <div className="text-center">
-                          <div className="text-sm text-gray-600">Current Pitch</div>
+                          <div className="text-sm text-svl-grey/70">Current Pitch</div>
                           <div className={`text-2xl md:text-3xl font-bold ${
                             currentPitch === 0 ? 'text-gray-400' :
-                            Math.abs(currentPitch - notes[selectedNote]) < 5 ? 'text-green-500' :
-                            Math.abs(currentPitch - notes[selectedNote]) < 15 ? 'text-yellow-500' : 'text-red-500'
+                            Math.abs(currentPitch - notes[selectedNote]) < 5 ? 'text-svl-blue' :
+                            Math.abs(currentPitch - notes[selectedNote]) < 15 ? 'text-svl-yellow' : 'text-svl-orange'
                           }`}>
                             {currentPitch > 0 ? `${currentPitch} Hz` : 'No signal'}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-svl-grey/60 mt-1">
                             Target: {Math.round(notes[selectedNote])} Hz
                           </div>
                         </div>
@@ -649,17 +687,17 @@ that he knew the good of it.`
                   </div>
 
                   {/* Reading Selection */}
-                  <div className="panel bg-white rounded-xl shadow-lg p-4 md:p-6">
-                    <h2 className="text-lg md:text-xl font-semibold mb-4">📚 Select Reading Material</h2>
+                  <div className="panel bg-white rounded-xl shadow-lg p-4 md:p-6 border border-svl-purple/10">
+                    <h2 className="font-display text-lg md:text-xl font-semibold mb-4 text-svl-grey">📚 Select Reading Material</h2>
                     <div className="space-y-3">
                       {readings.map(reading => (
                         <button
                           key={reading.id}
                           onClick={() => setSelectedReading(reading)}
-                          className="w-full text-left p-3 md:p-4 border border-gray-200 rounded-lg hover:bg-purple-50 transition-colors focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                          className="w-full text-left p-3 md:p-4 border border-svl-purple/20 rounded-lg hover:bg-svl-beige transition-colors focus:ring-2 focus:ring-svl-purple focus:outline-none"
                         >
-                          <div className="font-semibold text-base md:text-lg">{reading.title}</div>
-                          <div className="text-xs md:text-sm text-gray-600 mt-1">{reading.description}</div>
+                          <div className="font-semibold text-base md:text-lg text-svl-grey">{reading.title}</div>
+                          <div className="text-xs md:text-sm text-svl-grey/70 mt-1">{reading.description}</div>
                         </button>
                       ))}
                     </div>
@@ -667,17 +705,17 @@ that he knew the good of it.`
                 </div>
               ) : (
                 /* Reading View */
-                <div className="reader-panel bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 h-full">
+                <div className="reader-panel bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 h-full border border-svl-purple/10">
                   <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
                     <div>
                       <button
                         onClick={() => setSelectedReading(null)}
-                        className="text-purple-600 hover:text-purple-700 mb-2 transition-colors"
+                        className="text-svl-purple hover:opacity-90 mb-2 transition-colors"
                       >
                         ← Back
                       </button>
-                      <h2 className="text-lg md:text-xl font-semibold">{selectedReading.title}</h2>
-                      <p className="text-xs text-gray-500">{selectedReading.description}</p>
+                      <h2 className="font-display text-lg md:text-xl font-semibold text-svl-grey">{selectedReading.title}</h2>
+                      <p className="text-xs text-svl-grey/60">{selectedReading.description}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -686,14 +724,14 @@ that he knew the good of it.`
                           const current = sizes.indexOf(fontSize);
                           setFontSize(sizes[(current + 1) % sizes.length]);
                         }}
-                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm transition-colors"
+                        className="px-4 py-2 bg-svl-yellow text-svl-grey hover:opacity-90 rounded-lg text-sm transition-colors"
                       >
                         Aa
                       </button>
                     </div>
                   </div>
 
-                  <div className={`reader-content reading-text ${getFontSizeClass()} text-gray-800 whitespace-pre-wrap`}>
+                  <div className={`reader-content reading-text ${getFontSizeClass()} text-svl-grey whitespace-pre-wrap`}>
                     {selectedReading.content}
                   </div>
                 </div>
@@ -713,27 +751,27 @@ that he knew the good of it.`
                   {getPitchStatus()}
                 </button>
               ) : (
-                <div className="bg-white rounded-2xl shadow-xl p-4 w-56">
+                <div className="bg-white rounded-2xl shadow-xl p-4 w-56 border border-svl-purple/10">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-semibold text-sm">Pitch Monitor</span>
-                    <button onClick={() => setBubbleExpanded(false)} className="text-gray-500 text-xl" aria-label="Close">×</button>
+                    <span className="font-semibold text-sm text-svl-grey">Pitch Monitor</span>
+                    <button onClick={() => setBubbleExpanded(false)} className="text-svl-grey text-xl" aria-label="Close">×</button>
                   </div>
 
                   <div className="text-center mb-3">
                     <div className={`text-2xl font-bold ${
                       currentPitch === 0 ? 'text-gray-400' :
-                      Math.abs(currentPitch - notes[selectedNote]) < 5 ? 'text-green-500' :
-                      Math.abs(currentPitch - notes[selectedNote]) < 15 ? 'text-yellow-500' : 'text-red-500'
+                      Math.abs(currentPitch - notes[selectedNote]) < 5 ? 'text-svl-blue' :
+                      Math.abs(currentPitch - notes[selectedNote]) < 15 ? 'text-svl-yellow' : 'text-svl-orange'
                     }`}>
                       {currentPitch > 0 ? `${currentPitch} Hz` : '---'}
                     </div>
-                    <div className="text-xs text-gray-500">Target: {selectedNote} ({Math.round(notes[selectedNote])} Hz)</div>
+                    <div className="text-xs text-svl-grey/60">Target: {selectedNote} ({Math.round(notes[selectedNote])} Hz)</div>
                   </div>
 
                   {/* Quick volume in bubble */}
                   <div className="mb-3">
-                    <label className="block text-xs text-gray-700 mb-1">
-                      🔊 Volume <span className="text-gray-500">({Math.round(volume * 100)}%)</span>
+                    <label className="block text-xs text-svl-grey mb-1">
+                      🔊 Volume <span className="text-svl-grey/60">({Math.round(volume * 100)}%)</span>
                     </label>
                     <input
                       aria-label="Drone volume (bubble)"
@@ -750,13 +788,13 @@ that he knew the good of it.`
                   <div className="flex gap-2">
                     <button
                       onClick={isDronePlaying ? stopDrone : startDrone}
-                      className={`flex-1 py-2 rounded-lg text-sm text-white ${isDronePlaying ? 'bg-red-500' : 'bg-green-500'}`}
+                      className={`flex-1 py-2 rounded-lg text-sm text-white ${isDronePlaying ? 'bg-svl-orange' : 'bg-svl-purple'} hover:opacity-90`}
                     >
                       {isDronePlaying ? 'Mute Drone' : 'Play Drone'}
                     </button>
                     <button
                       onClick={() => { setShowBubble(false); setBubbleExpanded(false); }}
-                      className="px-3 py-2 bg-gray-500 text-white rounded-lg text-sm"
+                      className="px-3 py-2 bg-svl-grey text-white rounded-lg text-sm hover:opacity-90"
                     >
                       Hide
                     </button>
@@ -779,11 +817,12 @@ that he knew the good of it.`
         const swCode = `
           const CACHE_NAME = 'voice-trainer-v1';
           const urlsToCache = [
-            '/',
+            './',
             'https://unpkg.com/react@18/umd/react.production.min.js',
             'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
             'https://unpkg.com/@babel/standalone/babel.min.js',
-            'https://cdn.tailwindcss.com'
+            'https://cdn.tailwindcss.com',
+            'https://www.seattlevoicelab.com/wp-content/uploads/2023/05/SVL_LogoSignature.png'
           ];
           self.addEventListener('install', event => {
             event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
