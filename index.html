@@ -67,23 +67,33 @@
       const [selectedReading, setSelectedReading] = useState(null);
       const [fontSize, setFontSize] = useState('large');
 
-      /* NEW: volume (0–200%) that scales the original safe base gain (0.2) */
+      /* Volume 0–200% of safe base gain (0.2) */
       const [volumePct, setVolumePct] = useState(100);
       const baseGain = 0.2;
 
+      /* NEW: timbre + gentle loudness helpers */
+      const [timbre, setTimbre] = useState('sine');      // sine, triangle, sawtooth, square
+      const [softenHighs, setSoftenHighs] = useState(true); // lowpass to avoid "metallic"
+      const [phoneBoost, setPhoneBoost] = useState(false);  // EQ + compressor for phones
+
       const audioContextRef = useRef(null);
-      const oscillatorRef = useRef(null);
-      const gainNodeRef = useRef(null);
-      const analyserRef = useRef(null);
-      const micStreamRef = useRef(null);
+      const oscillatorRef   = useRef(null);
+      const gainNodeRef     = useRef(null);
+      const analyserRef     = useRef(null);
+      const micStreamRef    = useRef(null);
       const pitchDetectionRef = useRef(null);
+
+      /* NEW: processing nodes so we can tweak live */
+      const lowpassRef   = useRef(null);  // soften highs
+      const highshelfRef = useRef(null);  // gentle clarity bump when boost on
+      const compressorRef= useRef(null);  // loudness control for phones
 
       const notes = {
         'A3': 220.00, 'B3': 246.94, 'C4': 261.63, 'C#4': 277.18, 'D4': 293.66,
         'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00
       };
 
-      /* Readings: original two + all monologues you shared (clean paragraphs) */
+      /* Readings (unchanged) */
       const readings = [
         {
           id: 'rainbow',
@@ -269,38 +279,78 @@ Now, what would you call a woman with that strength in her have to die of influe
             await audioContextRef.current.resume();
           }
 
-          const osc = audioContextRef.current.createOscillator();
-          const gain = audioContextRef.current.createGain();
+          const ctx = audioContextRef.current;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const lowpass = ctx.createBiquadFilter();
+          const shelf   = ctx.createBiquadFilter();
+          const comp    = ctx.createDynamicsCompressor();
 
-          osc.type = 'sine';
+          // Timbre + note
+          osc.type = timbre;
           osc.frequency.value = notes[selectedNote];
 
-          // volume uses base gain scaled by slider (0–200%)
+          // Soften metallic edge with a gentle lowpass when enabled
+          lowpass.type = 'lowpass';
+          lowpass.frequency.value = softenHighs ? 2400 : 18000;
+          lowpass.Q.value = 0.7;
+
+          // Subtle clarity for small speakers when "phone boost" is on
+          shelf.type = 'highshelf';
+          shelf.frequency.value = 2500;
+          shelf.gain.value = phoneBoost ? 3 : 0;
+
+          // Dynamics to raise perceived loudness on phones
+          if (phoneBoost) {
+            comp.threshold.setValueAtTime(-26, ctx.currentTime);
+            comp.knee.setValueAtTime(9, ctx.currentTime);
+            comp.ratio.setValueAtTime(3, ctx.currentTime);
+          } else {
+            // Neutral settings (effectively bypass)
+            comp.threshold.setValueAtTime(0, ctx.currentTime);
+            comp.knee.setValueAtTime(0, ctx.currentTime);
+            comp.ratio.setValueAtTime(1, ctx.currentTime);
+          }
+          comp.attack.setValueAtTime(0.003, ctx.currentTime);
+          comp.release.setValueAtTime(0.25, ctx.currentTime);
+
+          // Volume uses base gain scaled by slider (0–200%)
           gain.gain.value = baseGain * (volumePct / 100);
 
-          osc.connect(gain);
-          gain.connect(audioContextRef.current.destination);
+          // Connect graph: osc -> lowpass -> highshelf -> compressor -> gain -> out
+          osc.connect(lowpass);
+          lowpass.connect(shelf);
+          shelf.connect(comp);
+          comp.connect(gain);
+          gain.connect(ctx.destination);
 
           osc.start();
+
           oscillatorRef.current = osc;
           gainNodeRef.current = gain;
+          lowpassRef.current = lowpass;
+          highshelfRef.current = shelf;
+          compressorRef.current = comp;
+
           setIsDronePlaying(true);
         } catch (error) {
           console.error('Drone error:', error);
         }
-      }, [selectedNote, volumePct]);
+      }, [selectedNote, timbre, softenHighs, phoneBoost, volumePct]);
 
       const stopDrone = useCallback(() => {
         if (oscillatorRef.current) {
           try { oscillatorRef.current.stop(); } catch {}
           oscillatorRef.current = null;
         }
-        if (gainNodeRef.current) gainNodeRef.current = null;
+        gainNodeRef.current = null;
+        lowpassRef.current = null;
+        highshelfRef.current = null;
+        compressorRef.current = null;
         setIsDronePlaying(false);
       }, []);
 
       const togglePitchMonitor = useCallback(async () => {
-        // iOS/Safari unlock on gesture
         if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
           try { await audioContextRef.current.resume(); } catch {}
         }
@@ -323,6 +373,12 @@ Now, what would you call a woman with that strength in her have to die of influe
       /* Keep mic + context lifecycle clean */
       useEffect(() => {
         initAudio();
+        // Default: enable boost on small screens
+        try {
+          if (window.matchMedia && window.matchMedia('(max-width: 480px)').matches) {
+            setPhoneBoost(true);
+          }
+        } catch {}
         return () => {
           if (pitchDetectionRef.current) cancelAnimationFrame(pitchDetectionRef.current);
           if (oscillatorRef.current) { try { oscillatorRef.current.stop(); } catch {} }
@@ -331,12 +387,41 @@ Now, what would you call a woman with that strength in her have to die of influe
         };
       }, [initAudio]);
 
-      /* Live-update volume while playing */
+      /* Live updates while playing */
       useEffect(() => {
         if (gainNodeRef.current) {
           gainNodeRef.current.gain.value = baseGain * (volumePct / 100);
         }
       }, [volumePct]);
+
+      useEffect(() => {
+        if (oscillatorRef.current) oscillatorRef.current.type = timbre;
+      }, [timbre]);
+
+      useEffect(() => {
+        if (lowpassRef.current) {
+          lowpassRef.current.frequency.value = softenHighs ? 2400 : 18000;
+        }
+      }, [softenHighs]);
+
+      useEffect(() => {
+        const ctx = audioContextRef.current;
+        if (ctx && compressorRef.current && highshelfRef.current) {
+          const comp = compressorRef.current;
+          const shelf = highshelfRef.current;
+          if (phoneBoost) {
+            comp.threshold.setValueAtTime(-26, ctx.currentTime);
+            comp.knee.setValueAtTime(9, ctx.currentTime);
+            comp.ratio.setValueAtTime(3, ctx.currentTime);
+            shelf.gain.value = 3;
+          } else {
+            comp.threshold.setValueAtTime(0, ctx.currentTime);
+            comp.knee.setValueAtTime(0, ctx.currentTime);
+            comp.ratio.setValueAtTime(1, ctx.currentTime);
+            shelf.gain.value = 0;
+          }
+        }
+      }, [phoneBoost]);
 
       const getPitchColor = () => {
         if (currentPitch === 0) return 'bg-gray-400';
@@ -396,25 +481,45 @@ Now, what would you call a woman with that strength in her have to die of influe
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
                   <h2 className="text-xl font-semibold mb-4">Pitch Control</h2>
 
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Target Note
-                    </label>
-                    <select
-                      value={selectedNote}
-                      onChange={(e) => setSelectedNote(e.target.value)}
-                      className="w-full p-3 text-lg border border-gray-300 rounded-lg"
-                    >
-                      {Object.entries(notes).map(([note, freq]) => (
-                        <option key={note} value={note}>
-                          {note} ({Math.round(freq)} Hz)
-                        </option>
-                      ))}
-                    </select>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Note */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Target Note
+                      </label>
+                      <select
+                        value={selectedNote}
+                        onChange={(e) => setSelectedNote(e.target.value)}
+                        className="w-full p-3 text-lg border border-gray-300 rounded-lg"
+                      >
+                        {Object.entries(notes).map(([note, freq]) => (
+                          <option key={note} value={note}>
+                            {note} ({Math.round(freq)} Hz)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* NEW: Timbre */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Timbre (tone color)
+                      </label>
+                      <select
+                        value={timbre}
+                        onChange={(e) => setTimbre(e.target.value)}
+                        className="w-full p-3 text-lg border border-gray-300 rounded-lg"
+                      >
+                        <option value="sine">Sine — soft / pure</option>
+                        <option value="triangle">Triangle — warm</option>
+                        <option value="sawtooth">Saw — bright</option>
+                        <option value="square">Square — hollow</option>
+                      </select>
+                    </div>
                   </div>
 
-                  {/* NEW: Volume slider */}
-                  <div className="mb-4">
+                  {/* Volume slider */}
+                  <div className="mt-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Drone Volume: <span className="font-semibold">{volumePct}%</span>
                     </label>
@@ -433,7 +538,31 @@ Now, what would you call a woman with that strength in her have to die of influe
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mb-4">
+                  {/* NEW: Boost / Soften toggles */}
+                  <div className="mt-4 grid sm:grid-cols-2 gap-3">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={phoneBoost}
+                        onChange={(e)=>setPhoneBoost(e.target.checked)}
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Phone Boost (EQ + compressor)
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={softenHighs}
+                        onChange={(e)=>setSoftenHighs(e.target.checked)}
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Soften highs (less metallic)
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-6 mb-4">
                     <button
                       onClick={isDronePlaying ? stopDrone : startDrone}
                       disabled={!audioInitialized}
